@@ -1,0 +1,52 @@
+import math
+import random
+from itertools import groupby as g
+import operator
+import numpy as np
+from numpy import linalg as LA
+import scipy
+
+#strategy for A  (current cash, current territory, how much to invest, accept or reject treaty)
+#strategy for B (current cash, current territory, how much to invest, (treaty division, treaty cash transfer))
+
+#Endowments
+I_0_A = 500 #cash endowment of A
+I_0_B = 600 #cash endowment of B
+alpha_A = .55 #territory endowment of A
+alpha_B = 1 - alpha_A #territory endowment of B
+ 
+
+def create_strategy():  
+    strat = [random.randint(0,100)/100 for i in range(periods)] 
+    return tuple(strat)
+
+def generate_population(pop_size):
+    stratA.generate()
+    stratB.generate()
+   # [create_strategy() for i in range(pop_size)]
+    #stratB = [create_strategy() for i in range(pop_size)]
+    return stratA,stratB
+
+
+
+
+
+
+def fitness():
+    
+
+
+    
+
+def total_fitness(pop_A, pop_B):
+    total = 0
+    for i in range(length(pop_A)):
+        for j in range(length(pop_B)):
+            if i =
+
+
+
+
+
+
+#def tournaments_survival()
