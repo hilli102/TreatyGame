@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jun  8 14:49:26 2018
+
+@author: hilli102
+"""
+
+import math
+import random
+from itertools import groupby as g
+import operator
+import numpy as np
+from numpy import linalg as LA
+import scipy
+
+
+
+#strategy for A  (current cash, current territory, how much to invest, accept or reject treaty)
+#strategy for B (current cash, current territory, how much to invest, (treaty division, treaty cash transfer))
+
+
+#Endowments
+endowment_A = 100 #cash endowment of A
+endowment_B = 100 #cash endowment of B
+
+
+alpha_A = .75 #territory endowment of A
+alpha_B = 1 - alpha_A #territory endowment of B
+
+
+# is a positive integer indicating player i’s maximal possible value earned by owning the entire resource
+M_A = 200 
+M_B = 500 
+
+#k_i (>1) is a positive constant regulating the % of maximal value earned when
+#owning the proportion rho of the resource: the larger is k_i the greater rho must
+#be to earn the same value
+k_A = 1.5
+k_B = 5
+
+# is a constant controlling how quickly investment in expansion increases rho for individual i 
+# the larger n_i the more investment is required to achieve the same expansion 
+n_A = 2
+n_B = 5
+
+#rho is the proportion owned
+def value_A(rho):
+    valueA = 200*(k_A*rho/(.5+rho))
+    return valueA
+
+def value_B(rho):
+    valueB = 400*(k_B*rho/(.5+rho))
+    return valueB
+ 
+def proportion_changes(A_investment,B_investment):
+    x = (A_investment*endowment_A)
+    y = (B_investment*endowment_B)
+    delta_A = x*(1-alpha_A)**2/(x*(1-alpha_A)+n_A)
+    delta_B = y*(alpha_A)**2/(y*(alpha_A)+n_B)
+    gamma = delta_A - delta_B
+    return alpha_A + gamma
+
+
+def create_strategy():  
+    strat = random.randint(0,100)/100
+    return strat
+
+
+def fitness(stratA, stratB):
+    new_rho = proportion_changes(stratA, stratB)
+    a_value = value_A(new_rho)
+    #b_value = value_B(1-new_rho)
+    return a_value#,b_value
+    
+def make_fit_dict(population):  
+    populationA = population[0]
+    populationB = population[1]
+    pop_fitness_dict_A ={}
+    pop_fitness_dict_B ={}
+    for i in range(len(populationA)):
+        single_fitnessA = []
+        single_fitnessB = []
+        for j in range(len(populationA)):
+                fitsA = fitness(populationA[i],populationB[j])
+                fitsB = fitness(populationA[j],populationB[i])
+                single_fitnessA.append(fitsA)
+                single_fitnessB.append(fitsB)
+        x=populationA[i]
+        y=populationB[i]
+        pop_fitness_dict_A[x] = (sum(single_fitnessA)).real
+        pop_fitness_dict_B[y] = (sum(single_fitnessB)).real
+    return pop_fitness_dict_A,pop_fitness_dict_B
+
+def tournament_survival(population):
+    fitty = make_fit_dict(population)
+    fitsA = fitty[0]
+    fitsB = fitty[1]
+    new_populationA =[]
+    new_populationB =[]
+    for i in range(pop_size):
+        strat1A,strat2A = (random.sample(population[0], 2))
+        strat1B,strat2B = (random.sample(population[1], 2))
+        
+        new_populationA.append(better_strategy(strat1A,strat2A,fitsA))
+        new_populationB.append(better_strategy(strat1B,strat2B,fitsB))
+    return [new_populationA,new_populationB]
+
+
+def better_strategy(strat1, strat2,fitness_dict):
+    if fitness_dict[strat1] >= fitness_dict[strat2]:
+        return strat1
+    return strat2
+
+
+def generate_population(pop_size):
+    pops = []
+    for i in range(types_of_players):
+        pops.append([create_strategy() for i in range(pop_size)])
+
+    return pops
+
+
+
+def binary_mutation(strategy):
+    if random.random() < mutation_prob:
+        return 1- strategy
+    else:
+        return strategy
+
+
+def generate_children(population):
+    children = []
+    for i in range(num_of_children):
+        parent_pair = random.sample(list(population), 2)
+        child = (parent_pair[0]+parent_pair[1])/2
+        children.append(child)
+    return children
+    
+
+pop_size = 50
+
+mutation_prob = 1/5
+num_of_children = 25
+
+types_of_players = 2
+
+
+test = generate_population(5)
+#test = create_strategy()
+
+b= make_fit_dict(test)
+print(b)
